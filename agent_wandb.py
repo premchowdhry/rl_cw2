@@ -20,7 +20,6 @@ import numpy as np
 import torch
 import time
 from matplotlib import pyplot as plt
-import wandb
 
 # The Network class inherits the torch.nn.Module class, which represents a neural network.
 class Network(torch.nn.Module):
@@ -67,14 +66,14 @@ class ReplayBuffer:
 class Agent:
 
     # Function to initialise the agent
-    def __init__(self):
-        self.epsilon = 0.5
+    def __init__(self, epsilon, decay, gamma, lr, batch_size, update_target_freq, episode_length, alpha):
+        self.epsilon = epsilon
         self.old_epsilon = None
-        self.decay = 0.95
-        self.gamma = 0.9
-        self.lr = 0.001
-        self.batch_size = 64
-        self.update_target_freq = 50
+        self.decay = decay
+        self.gamma = gamma
+        self.lr = lr
+        self.batch_size = batch_size
+        self.update_target_freq = update_target_freq
         # Set the episode length
         self.episode_length = 500
         # Reset the total number of steps which the agent has taken
@@ -87,7 +86,7 @@ class Agent:
         self.replay_buffer = ReplayBuffer(5000)
         self.weights = []
         self.probs = []
-        self.alpha = 0.5
+        self.alpha = alpha
 
         self.q_network = Network(input_dimension=2, output_dimension=4)
         self.target_network = Network(input_dimension=2, output_dimension=4)
@@ -228,9 +227,9 @@ class Agent:
         reward = 1 - (distance_to_goal * penalty)
 
         episode_steps = self.num_steps_taken % self.episode_length
-        if self.has_finished_epsiode:
+        if self.has_finished_episode:
             self.train = True
-        elif self.epsilon == 0 and self.has_finished_epsiode:
+        elif self.epsilon == 0 and self.has_finished_episode:
             self.epsilon = self.old_epsilon
         elif self.epsilon == 0 and distance_to_goal < 0.03 and episode_steps < 100:
             self.epsilon = self.old_epsilon

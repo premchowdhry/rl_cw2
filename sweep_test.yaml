@@ -1,0 +1,22 @@
+program: train_and_test_wandb.py
+method: grid
+metric:
+  goal: minimize
+  name: distance_to_goal
+parameters:
+  epsilon:
+    values: [0.1]
+  decay:
+    values: [0.85]
+  gamma:
+    values: [0.9]
+  lr:
+    values: [0.001]
+  batch_size:
+    values: [32]
+  update_target_freq:
+    values: [20]
+  episode_length:
+    values: [1000]
+  alpha:
+    values: [0.2]

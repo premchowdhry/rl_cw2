@@ -227,9 +227,9 @@ class Agent:
         reward = 1 - (distance_to_goal * penalty)
 
         episode_steps = self.num_steps_taken % self.episode_length
-        if self.has_finished_epsiode:
+        if self.has_finished_episode:
             self.train = True
-        elif self.epsilon == 0 and self.has_finished_epsiode:
+        elif self.epsilon == 0 and self.has_finished_episode:
             self.epsilon = self.old_epsilon
         elif self.epsilon == 0 and distance_to_goal < 0.03 and episode_steps < 100:
             self.epsilon = self.old_epsilon

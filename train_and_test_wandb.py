@@ -2,14 +2,28 @@ import time
 import numpy as np
 
 from random_environment import Environment
-from agent import Agent
+from agent_wandb import Agent
+
+import wandb
 
 # Main entry point
 if __name__ == "__main__":
+    hyperparameter_defaults = dict(
+        epsilon=0.5,
+        decay=0.95,
+        gamma=0.9,
+        lr=0.001,
+        batch_size=32,
+        update_target_freq=50,
+        episode_length=5000,
+        alpha=0.6
+    )
+    wandb.init(config=hyperparameter_defaults, project='Coursework', entity='premchowdhry')
+    config = wandb.config
 
     # This determines whether the environment will be displayed on each each step.
     # When we train your code for the 10 minute period, we will not display the environment.
-    display_on = True
+    display_on = False
 
     # Create a random seed, which will define the environment
     # random_seed = int(time.time())
@@ -20,17 +34,22 @@ if __name__ == "__main__":
     environment = Environment(magnification=500)
 
     # Create an agent
-    agent = Agent()
+    agent = Agent(
+        config.epsilon,
+        config.decay,
+        config.gamma,
+        config.lr,
+        config.batch_size,
+        config.update_target_freq,
+        config.episode_length,
+        config.alpha
+    )
 
     # Get the initial state
     state = environment.init_state
 
-    # Determine the time at which training will stop, i.e. in 10 minutes (600 seconds) time
-    start_time = time.time()
-    end_time = start_time + 600
-
     # Train the agent, until the time is up
-    while time.time() < end_time:
+    for _ in range(25 * config.episode_length):
         # If the action is to start a new episode, then reset the state
         if agent.has_finished_episode():
             state = environment.init_state
@@ -52,6 +71,9 @@ if __name__ == "__main__":
     for step_num in range(100):
         action = agent.get_greedy_action(state)
         next_state, distance_to_goal = environment.step(state, action)
+
+        metrics = {'distance_to_goal': distance_to_goal}
+        wandb.log(metrics)
         # The agent must achieve a maximum distance of 0.03 for use to consider it "reaching the goal"
         if distance_to_goal < 0.03:
             has_reached_goal = True
